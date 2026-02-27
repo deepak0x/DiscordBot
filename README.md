@@ -1,18 +1,18 @@
-# DiscordBot
+# Telegram Outreach Bot
 
-A Discord bot for automating outreach emails with resume attachment, role inference, and MongoDB tracking. The bot interacts with users via Discord commands, generates tailored email content, and sends emails with the appropriate resume attached.
+A Telegram bot for automating cold outreach emails. It crafts highly tailored, personalized emails using LLMs (Gemini, OpenAI, or OpenRouter), automatically selects the best matching resume based on the job description, and provides a preview/edit interface inside Telegram before sending.
 
 ---
 
 ## Features
 
-- **Discord Integration:** Interact with the bot using commands (`!email`, `!confirm`, `!cancel`, `!update`, `!hello`).
-- **Automated Email Generation:** Generates personalized outreach emails based on user input and inferred job role.
-- **Resume Attachment:** Automatically selects and attaches the correct resume (software or data science) based on the inferred role.
-- **Role Inference:** Uses keyword scoring to determine if the message is for a software or data science/machine learning role.
+- **Telegram Interface:** Interact with the bot using commands like `/email` and `/batch_email`.
+- **Intelligent Email Generation:** Uses advanced LLMs to identify the target role (e.g., Software Engineering vs Machine Learning) and crafts a dense, highly personalized email.
+- **Dynamic Resume Attachment:** Automatically chooses the correct resume PDF to attach based on the LLM's role inference.
+- **Inline Editing:** Before sending, preview the generated email and click "Edit" to dynamically adjust the text natively inside Telegram.
+- **Provider Switching:** Jump between LLM endpoints (`/provider`) and configure custom API keys (`/setkey`) directly from chat.
+- **Batch Processing:** Send an entire campaign of emails by uploading a CSV.
 - **MongoDB Tracking:** Tracks the number of emails sent by each user.
-- **Robust Error Handling:** Handles invalid input, missing environment variables, and database errors gracefully.
-- **Email Preview and Editing:** Allows users to preview, confirm, update, or cancel emails before sending.
 
 ---
 
@@ -21,104 +21,83 @@ A Discord bot for automating outreach emails with resume attachment, role infere
 ### 1. Clone the Repository
 
 ```sh
-git clone https://github.com/deepakbhagatiitr/DiscordBot.git
+git clone https://github.com/deepak0x/DiscordBot.git
 cd DiscordBot
 ```
 
-### 2. Install Dependencies
+### 2. Configure Personal Details
+
+For privacy, personal data is not stored in Git. You must copy the example templates and fill in your own information:
 
 ```sh
-pip install -r requirements.txt
+cp config.example.py config.py
+cp utils/email_composer.example.py utils/email_composer.py
 ```
+
+- Edit `config.py` to add your Name, LinkedIn, GitHub, etc.
+- Edit `utils/email_composer.py` to add your Software Developer / Data Scientist skills and projects.
 
 ### 3. Environment Variables
 
-Create a `.env` file in the root directory and set the following variables:
+Create a `.env` file in the root directory:
 
-```
-DISCORD_TOKENNew=your_discord_bot_token
+```env
+TELEGRAM_BOT_TOKEN=your_telegram_bot_token
 SMTP_EMAIL=your_gmail_address@gmail.com
 SMTP_PASSWORD=your_gmail_app_password
 MONGODB_URI=your_mongodb_connection_string
-```
 
-- `DISCORD_TOKENNew`: Your Discord bot token.
-- `SMTP_EMAIL`: Gmail address used to send emails.
-- `SMTP_PASSWORD`: Gmail app password (not your main password).
-- `MONGODB_URI`: MongoDB connection string (e.g., from MongoDB Atlas).
+# Optional (Can also be set via Telegram commands)
+GEMINI_API_KEY=your_gemini_api_key
+OPENAI_API_KEY=your_openai_api_key
+OPENROUTER_API_KEY=your_openrouter_api_key
+```
 
 ### 4. Prepare Resumes
 
-Place your resumes in the `resumes/` directory:
-- `resumes/software_dev_resume.pdf`
-- `resumes/data_science_resume.pdf`
+Place your resume PDFs in the `resumes/` directory. By default, the bot looks for:
+- `resumes/Deepak_Bhagat_Software_Engineer_Resume.pdf`
+- `resumes/Deepak_Bhagat_Data_Science_Resume.pdf`
+
+*(You can change these mapping filenames inside `utils/role_inference.py`)*
 
 ---
 
-## Usage
+## Usage (Docker)
 
-1. **Start the Bot:**
+The easiest way to run the bot is with Docker Compose.
 
-   ```sh
-   python main.py
-   ```
-
-2. **Discord Commands:**
-   - `!hello` — Check if the bot is running.
-   - `!email` — Start the email sending process.
-   - Paste your message as instructed (the bot will guide you).
-   - `!confirm` — Confirm and send the email.
-   - `!cancel` — Cancel the pending email.
-   - `!update` — Edit the email before sending.
-
-3. **Email Format:**
-   - The bot will extract recipient, subject, and message from your input.
-   - Example:
-     ```
-     to:recipient@example.com subject:Application for ML Role message:Hello, I am interested in...
-     ```
-
----
-
-## Project Structure
-
-```
-DiscordBot/
-├── main.py                # Main Discord bot logic
-├── emailsend.py           # Email sending utility
-├── linkedin_outreach_email_generator.py # Email content generator
-├── requirements.txt       # Python dependencies
-├── resumes/
-│   ├── software_dev_resume.pdf
-│   └── data_science_resume.pdf
-└── .env                   # Environment variables (not committed)
+```sh
+docker compose build
+docker compose up -d
 ```
 
 ---
 
-## Dependencies
+## Commands
 
-- discord.py
-- pymongo
-- python-dotenv
+Once running, send a message to your bot on Telegram:
+- `/start` or `/help` — Show the welcome message.
+- `/email` — Start drafting a new outreach email manually.
+- `/batch_email` — Upload a CSV to bulk-generate and send emails.
+- `/provider` — Toggle active LLM (Gemini, OpenAI, OpenRouter).
+- `/setkey <provider> <key>` — Save a custom API key for an LLM endpoint.
+- `/health` — Ping the server.
+- `/cancel` — Unload your current state.
 
-Install all dependencies with:
+### How to use `/email`
+1. Type `/email`.
+2. Paste the target Recruiter Email and the Job Description into the chat.
+3. The AI generates the subject and body, and chooses the resume.
+4. An inline keyboard appears. You can hit **Send**, **Edit**, or **Cancel**.
+
+---
+
+## Developer Requirements
+
+If not using Docker, you can run locally:
 
 ```sh
 pip install -r requirements.txt
+python main.py
 ```
-
----
-
-## Notes
-
-- Make sure to enable "Less secure app access" or use an App Password for Gmail SMTP.
-- The bot uses MongoDB to track user activity; ensure your database is accessible.
-- Only one pending email per user is tracked at a time.
-
-
----
-
-## Contact
-
-For questions or support, open an issue or contact

@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  bot:
+    build: .
+    container_name: deepak_reaches_bot
+    restart: unless-stopped
+    env_file:
+      - .env
+    # Optional: Mount the resumes folder so you can update PDFs without rebuilding
+    volumes:
+      - ./resumes:/app/resumes

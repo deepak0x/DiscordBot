@@ -5,3 +5,7 @@ __pycache__/
 deploy.sh
 discordbot.tar.gz
 /resumes/
+*.pdf
+Deepak_*.pdf
+config.py
+utils/email_composer.py
